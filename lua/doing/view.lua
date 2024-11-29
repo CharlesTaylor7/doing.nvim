@@ -5,9 +5,7 @@ local View = {}
 
 ---Create a winbar string for the current task
 function View.status()
-  if (not state.view_enabled) or
-      (not utils.should_display_task())
-  then
+  if (not state.view_enabled) or (not utils.should_display_task()) then
     return ""
   end
 
@@ -27,14 +25,7 @@ function View.status()
       return ""
     end
 
-    res = state.options.doing_prefix .. current
-
-    -- append task count number if there is more than 1 task
-    if count > 1 then
-      right = '+' .. (count - 1) .. " more"
-    end
-
-    return res
+    return state.options.doing_prefix .. current
   end)
 
   if not ok then
@@ -45,7 +36,7 @@ function View.status()
     return left
   end
 
-  return left .. '  ' .. right
+  return left .. "  " .. right
 end
 
 View.stl = "%!v:lua.DoingStatusline('active')"
