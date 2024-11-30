@@ -19,7 +19,7 @@ end
 function Core.add(task, to_front)
   state.tasks:sync(true)
   if task == nil then
-    vim.ui.input({ prompt = 'Enter the new task: ' }, function(input)
+    vim.ui.input({ prompt = "Enter the new task: " }, function(input)
       state.tasks:add(input, to_front)
       Core.redraw_winbar()
       utils.exec_task_modified_autocmd()
@@ -53,8 +53,6 @@ function Core.done()
 
   if state.tasks:count() == 0 then
     Core.show_message(" All tasks done ")
-  else
-    Core.show_message(state.tasks:count() .. " left.")
   end
 
   utils.exec_task_modified_autocmd()
@@ -102,9 +100,7 @@ end
 
 --- Redraw winbar depending on if there are tasks. Redraw if there are pending tasks, other wise set to ""
 function Core.redraw_winbar()
-  if utils.should_display_task() and
-      state.options.winbar.enabled
-  then
+  if utils.should_display_task() and state.options.winbar.enabled then
     if state.tasks:has_items() or state.message then
       vim.wo.winbar = view.stl
     else
