@@ -11,11 +11,18 @@ function M.add(task, to_front)
   M.redraw_winbar()
 end
 
+--- Drop current task with no event
+function M.drop()
+  vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, 1, false, {})
+  M.redraw_winbar()
+end
+
 --- Defer current task to end of list
 function M.defer()
   local task = vim.api.nvim_buf_get_lines(M.tasks_bufnr, 0, 0, false)[1]
   M.drop()
   M.add(task)
+  M.redraw_winbar()
 end
 
 --- Edit the tasks in a floating window
@@ -25,7 +32,8 @@ end
 
 --- Finish the current task
 function M.done()
-  vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, 1, false, {})
+  M.drop()
+  -- TODO: custom event
   M.redraw_winbar()
 end
 
@@ -112,6 +120,7 @@ return {
     end, { nargs = 1, bang = true })
 
     vim.api.nvim_create_user_command("Defer", plugin.defer, {})
+    vim.api.nvim_create_user_command("Drop", plugin.drop, {})
     vim.api.nvim_create_user_command("Done", plugin.done, {})
     vim.api.nvim_create_user_command("DoEdit", plugin.edit, {})
 
