@@ -13,7 +13,7 @@ end
 
 --- Drop current task with no event
 function M.toggle()
-  vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, 1, false, {})
+  M.active = not M.active
   M.redraw_winbar()
 end
 
@@ -92,7 +92,11 @@ end
 
 --- Redraw winbar based on the first line of the tasks buffer
 function M.redraw_winbar()
-  if vim.fn.win_gettype() ~= "" or vim.tbl_contains(M.options.ignored_filetypes, vim.bo.filetype, {}) then
+  if
+    not M.active
+    or vim.fn.win_gettype() ~= ""
+    or vim.tbl_contains(M.options.ignored_filetypes, vim.bo.filetype, {})
+  then
     vim.api.nvim_set_option_value("winbar", "", { win = 0 })
     return
   end
@@ -137,6 +141,7 @@ return {
     vim.api.nvim_create_user_command("Done", plugin.done, {})
     vim.api.nvim_create_user_command("DoEdit", plugin.edit, {})
 
+    plugin.active = opts.active
     plugin.setup(opts)
   end,
 }
