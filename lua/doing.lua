@@ -26,8 +26,9 @@ end
 --- Defer current task to end of list
 function M.defer()
   local removed = vim.api.nvim_buf_get_lines(M.tasks_bufnr, 0, 0, false)
-  vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, 1, false, {})
+  vim.print(removed)
   vim.api.nvim_buf_set_lines(M.tasks_bufnr, -1, -1, false, removed)
+  vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, 1, false, {})
   M.redraw_winbar()
 end
 
