@@ -7,10 +7,12 @@ which itself was originally a fork of [nocksock/do.nvim](https://github.com/nock
 
 ## Usage
 
--  `:Do` append a task to the end of the task buffer
--  `:Do!` prepend a task to the front of task buffer
--  `:Done` complete task 
--  `:DoEdit` edit task buffer in a floating window
+- `:Do` append a task to the end of the task buffer
+- `:Do!` prepend a task to the front of task buffer
+- `:Done` complete task and emit a custom event 
+- `:Drop` drop task from front of list with no event
+- `:Defer` move task from front to back of list
+- `:DoEdit` edit task buffer in a floating window
 
 ## Configuration
 

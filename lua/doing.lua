@@ -11,7 +11,14 @@ function M.add(task, to_front)
   M.redraw_winbar()
 end
 
---- M the tasks in a floating window
+--- Defer current task to end of list
+function M.defer()
+  local task = vim.api.nvim_buf_get_lines(M.tasks_bufnr, 0, 0, false)[1]
+  M.drop()
+  M.add(task)
+end
+
+--- Edit the tasks in a floating window
 function M.edit()
   M.open_float()
 end
@@ -104,6 +111,7 @@ return {
       plugin.add(unpack(args.fargs), args.bang)
     end, { nargs = 1, bang = true })
 
+    vim.api.nvim_create_user_command("Defer", plugin.defer, {})
     vim.api.nvim_create_user_command("Done", plugin.done, {})
     vim.api.nvim_create_user_command("DoEdit", plugin.edit, {})
 
