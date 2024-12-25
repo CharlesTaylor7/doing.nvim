@@ -8,6 +8,7 @@ function M.add(task, to_front)
   else
     vim.api.nvim_buf_set_lines(M.tasks_bufnr, -1, -1, false, { task })
   end
+  M.strip_blank_tasks()
   M.redraw_winbar()
 end
 
@@ -69,7 +70,7 @@ function M.setup(opts)
   M.options = opts
   M.tasks_bufnr = vim.fn.bufadd(opts.tasks_file)
   vim.fn.bufload(opts.tasks_file)
-
+  M.strip_blank_tasks()
   M.redraw_winbar()
 
   vim.api.nvim_create_autocmd("BufDelete", {
@@ -127,16 +128,18 @@ function M.open_float()
     pattern = tostring(win),
     group = M.augroup,
     callback = function()
-      -- TODO: strip out empty lines
-
-      local tasks = vim.api.nvim_buf_get_lines(M.tasks_bufnr, 0, -1, false)
-      local filtered = vim.tbl_filter(function(t)
-        return t ~= ""
-      end, tasks)
-      vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, -1, false, filtered)
+      M.strip_blank_tasks()
       M.redraw_winbar()
     end,
   })
+end
+
+function M.strip_blank_tasks()
+  local tasks = vim.api.nvim_buf_get_lines(M.tasks_bufnr, 0, -1, false)
+  local filtered = vim.tbl_filter(function(t)
+    return t ~= ""
+  end, tasks)
+  vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, -1, false, filtered)
 end
 
 return {
