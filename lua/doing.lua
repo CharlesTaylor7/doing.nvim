@@ -115,7 +115,7 @@ function M.open_float()
 
   vim.api.nvim_set_option_value("winhl", "Normal:NormalFloat", {})
   vim.api.nvim_create_autocmd("WinClosed", {
-    pattern = win,
+    pattern = tostring(win),
     group = M.augroup,
     callback = M.redraw_winbar,
   })
