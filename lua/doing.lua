@@ -79,7 +79,7 @@ function M.setup(opts)
     end,
   })
 
-  vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
+  vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter" }, {
     group = M.augroup,
     callback = M.redraw_winbar,
   })
@@ -97,7 +97,7 @@ function M.redraw_winbar()
   end
 
   local lines = vim.api.nvim_buf_get_lines(M.tasks_bufnr, 0, 1, false)
-  vim.api.nvim_set_option_value("winbar", lines[1], { scope = "global" })
+  vim.api.nvim_set_option_value("winbar", lines[1] or "", { scope = "global" })
 end
 
 function M.open_float()
