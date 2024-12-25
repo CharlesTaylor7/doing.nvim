@@ -11,7 +11,7 @@ function M.add(task, to_front)
   M.redraw_winbar()
 end
 
---- Drop current task with no event
+--- Toggle todo winbar
 function M.toggle()
   M.active = not M.active
   M.redraw_winbar()
@@ -25,10 +25,9 @@ end
 
 --- Defer current task to end of list
 function M.defer()
-  local removed = vim.api.nvim_buf_get_lines(M.tasks_bufnr, 0, 1, false)
-  vim.print(removed)
+  local task = M.current_task()
   vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, 1, false, {})
-  vim.api.nvim_buf_set_lines(M.tasks_bufnr, -1, -1, false, removed)
+  vim.api.nvim_buf_set_lines(M.tasks_bufnr, -1, -1, false, { task })
   M.redraw_winbar()
 end
 
@@ -39,9 +38,14 @@ end
 
 --- Finish the current task
 function M.done()
+  vim.api.nvim_exec_autocmds("User", { pattern = "Doing.nvim:Done", data = M.current_task() })
   M.drop()
-  -- TODO: custom event
-  M.redraw_winbar()
+end
+
+---@return string|nil
+function M.current_task()
+  local lines = vim.api.nvim_buf_get_lines(M.tasks_bufnr, 0, 1, false)
+  return lines[1]
 end
 
 ---@class (exact) Opts
@@ -101,8 +105,8 @@ function M.redraw_winbar()
     return
   end
 
-  local lines = vim.api.nvim_buf_get_lines(M.tasks_bufnr, 0, 1, false)
-  vim.api.nvim_set_option_value("winbar", lines[1] or "", { win = 0 })
+  local task = M.current_task() or ""
+  vim.api.nvim_set_option_value("winbar", task, { win = 0 })
 end
 
 function M.open_float()
