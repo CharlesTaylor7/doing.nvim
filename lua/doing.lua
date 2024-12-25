@@ -91,7 +91,7 @@ end
 
 --- Redraw winbar based on the first line of the tasks buffer
 function M.redraw_winbar()
-  if vim.tbl_contains(M.options.ignored_filetypes, vim.bo.filetype, {}) then
+  if vim.fn.win_gettype() ~= "" and vim.tbl_contains(M.options.ignored_filetypes, vim.bo.filetype, {}) then
     M.clear_winbar()
     return
   end
@@ -114,8 +114,8 @@ function M.open_float()
   })
 
   vim.api.nvim_set_option_value("winhl", "Normal:NormalFloat", {})
-  vim.api.nvim_create_autocmd("WinClosed", {
-    win = win,
+  vim.api.nvim_create_autocmd("WinLeave", {
+    buffer = M.tasks_bufnr,
     group = M.augroup,
     callback = M.redraw_winbar,
   })
