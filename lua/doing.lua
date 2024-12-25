@@ -12,6 +12,12 @@ function M.add(task, to_front)
 end
 
 --- Drop current task with no event
+function M.toggle()
+  vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, 1, false, {})
+  M.redraw_winbar()
+end
+
+--- Drop current task with no event
 function M.drop()
   vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, 1, false, {})
   M.redraw_winbar()
@@ -21,7 +27,7 @@ end
 function M.defer()
   local task = vim.api.nvim_buf_get_lines(M.tasks_bufnr, 0, 0, false)[1]
   M.drop()
-  M.add(task)
+  M.add(task, false)
   M.redraw_winbar()
 end
 
@@ -40,7 +46,9 @@ end
 ---@class (exact) Opts
 ---@field tasks_file string
 ---@field ignored_filetypes string[]
+---@field active boolean
 M.default_opts = {
+  active = true,
   tasks_file = ".tasks",
   ignored_filetypes = {
     "prompt",
@@ -106,6 +114,11 @@ function M.open_float()
   })
 
   vim.api.nvim_set_option_value("winhl", "Normal:NormalFloat", {})
+  vim.api.nvim_create_autocmd("WinClosed", {
+    win = win,
+    group = M.augroup,
+    callback = M.redraw_winbar,
+  })
 
   return win
 end
@@ -119,6 +132,7 @@ return {
       plugin.add(unpack(args.fargs), args.bang)
     end, { nargs = 1, bang = true })
 
+    vim.api.nvim_create_user_command("DoToggle", plugin.toggle, {})
     vim.api.nvim_create_user_command("Defer", plugin.defer, {})
     vim.api.nvim_create_user_command("Drop", plugin.drop, {})
     vim.api.nvim_create_user_command("Done", plugin.done, {})
