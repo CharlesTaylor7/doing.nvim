@@ -126,7 +126,16 @@ function M.open_float()
   vim.api.nvim_create_autocmd("WinClosed", {
     pattern = tostring(win),
     group = M.augroup,
-    callback = M.redraw_winbar,
+    callback = function()
+      -- TODO: strip out empty lines
+
+      local tasks = vim.api.nvim_buf_get_lines(M.tasks_bufnr, 0, -1, false)
+      local filtered = vim.tbl_filter(function(t)
+        return t ~= ""
+      end, tasks)
+      vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, -1, false, filtered)
+      M.redraw_winbar()
+    end,
   })
 end
 
