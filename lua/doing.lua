@@ -86,7 +86,7 @@ function M.setup(opts)
 end
 
 function M.clear_winbar()
-  vim.api.nvim_set_option_value("winbar", "", { scope = "global" })
+  vim.api.nvim_set_option_value("winbar", "", { win = 0 })
 end
 
 --- Redraw winbar based on the first line of the tasks buffer
@@ -97,7 +97,7 @@ function M.redraw_winbar()
   end
 
   local lines = vim.api.nvim_buf_get_lines(M.tasks_bufnr, 0, 1, false)
-  vim.api.nvim_set_option_value("winbar", lines[1] or "", { scope = "global" })
+  vim.api.nvim_set_option_value("winbar", lines[1] or "", { win = 0 })
 end
 
 function M.open_float()
