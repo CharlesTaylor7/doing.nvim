@@ -86,7 +86,7 @@ function M.setup(opts)
 end
 
 function M.clear_winbar()
-  vim.api.nvim_set_option_value("winbar", nil, { scope = "global" })
+  vim.api.nvim_set_option_value("winbar", "", { scope = "global" })
 end
 
 --- Redraw winbar based on the first line of the tasks buffer
