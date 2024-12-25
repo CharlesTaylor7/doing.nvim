@@ -3,7 +3,11 @@ local M = {}
 
 --- Add a task to the list
 function M.add(task, to_front)
-  vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, 0, false, { task })
+  if to_front then
+    vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, 0, false, { task })
+  else
+    vim.api.nvim_buf_set_lines(M.tasks_bufnr, -1, -1, false, { task })
+  end
   M.redraw_winbar()
 end
 
