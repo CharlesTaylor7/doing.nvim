@@ -38,7 +38,7 @@ end
 
 --- Finish the current task
 function M.done()
-  vim.api.nvim_exec_autocmds("User", { pattern = "Doing.nvim:Done", data = M.current_task() })
+  vim.api.nvim_exec_autocmds("User", { pattern = "doing:Done", data = M.current_task() })
   M.drop()
 end
 
