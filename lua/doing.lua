@@ -18,13 +18,15 @@ function M.done()
   M.redraw_winbar()
 end
 
----@class Opts
+---@class (exact) Opts
 ---@field tasks_file string
----@field ignored_buffers string[]
+---@field ignored_filetypes string[]
 M.default_opts = {
   tasks_file = ".tasks",
-  ignored_buffers = {
-    "NvimTree",
+  ignored_filetypes = {
+    "prompt",
+    "help",
+    "qf",
   },
 }
 M.augroup = vim.api.nvim_create_augroup("doing", {})
@@ -37,11 +39,6 @@ function M.setup(opts)
   vim.fn.bufload(opts.tasks_file)
 
   M.redraw_winbar()
-  vim.api.nvim_create_autocmd("BufWritePre", {
-    group = M.augroup,
-    buffer = M.tasks_bufnr,
-    callback = M.redraw_winbar,
-  })
 
   vim.api.nvim_create_autocmd("BufDelete", {
     group = M.augroup,
@@ -54,34 +51,26 @@ function M.setup(opts)
       M.setup(opts)
     end,
   })
+
+  vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
+    group = M.augroup,
+    callback = M.redraw_winbar,
+  })
 end
 
 function M.clear_winbar()
-  vim.api.nvim_set_option_value("winbar", nil, {})
+  vim.api.nvim_set_option_value("winbar", nil, { win = 0 })
 end
 
 --- Redraw winbar based on the first line of the tasks buffer
 function M.redraw_winbar()
-  if not M.should_display_task() then
+  if vim.tbl_contains(M.options.ignored_filetypes, vim.bo.filetype, {}) then
+    M.clear_winbar()
     return
   end
+
   local lines = vim.api.nvim_buf_get_lines(M.tasks_bufnr, 0, 1, false)
-  vim.api.nvim_set_option_value("winbar", lines[1], {})
-end
-
----Check whether the current window/buffer can display a winbar
-function M.should_display_task()
-  if vim.api.nvim_buf_get_name(0) == "" or vim.fn.win_gettype() == "preview" then
-    return false
-  end
-
-  for _, exclude in ipairs(M.options.ignored_buffers) do
-    if string.find(vim.bo.filetype, exclude) then
-      return false
-    end
-  end
-
-  return vim.fn.win_gettype() == "" and vim.bo.buftype ~= "prompt"
+  vim.api.nvim_set_option_value("winbar", lines[1], { win = 0 })
 end
 
 function M.open_float()
