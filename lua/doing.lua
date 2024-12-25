@@ -86,7 +86,7 @@ function M.setup(opts)
 end
 
 function M.clear_winbar()
-  vim.api.nvim_set_option_value("winbar", nil, { win = 0 })
+  vim.api.nvim_set_option_value("winbar", nil, { scope = "global" })
 end
 
 --- Redraw winbar based on the first line of the tasks buffer
@@ -97,7 +97,7 @@ function M.redraw_winbar()
   end
 
   local lines = vim.api.nvim_buf_get_lines(M.tasks_bufnr, 0, 1, false)
-  vim.api.nvim_set_option_value("winbar", lines[1], { win = 0 })
+  vim.api.nvim_set_option_value("winbar", lines[1], { scope = "global" })
 end
 
 function M.open_float()
@@ -114,13 +114,11 @@ function M.open_float()
   })
 
   vim.api.nvim_set_option_value("winhl", "Normal:NormalFloat", {})
-  vim.api.nvim_create_autocmd("WinLeave", {
-    buffer = M.tasks_bufnr,
+  vim.api.nvim_create_autocmd("WinClosed", {
+    pattern = win,
     group = M.augroup,
     callback = M.redraw_winbar,
   })
-
-  return win
 end
 
 return {
