@@ -131,34 +131,35 @@ function M.strip_blank_tasks()
   vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, -1, false, filtered)
 end
 
-return {
-  setup = function(opts)
-    local opts = vim.tbl_deep_extend("force", M.default_opts, opts or {})
+---@param opts Opts
+function M.setup(opts)
+  local opts = vim.tbl_deep_extend("force", M.default_opts, opts or {})
 
-    M.options = opts
-    M.active = opts.active
-    M.setup_dir()
+  M.options = opts
+  M.active = opts.active
+  M.setup_dir()
 
-    vim.api.nvim_create_autocmd("DirChanged", {
-      group = M.augroup,
-      callback = function()
-        M.setup_dir()
-      end,
-    })
+  vim.api.nvim_create_autocmd("DirChanged", {
+    group = M.augroup,
+    callback = function()
+      M.setup_dir()
+    end,
+  })
 
-    vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter" }, {
-      group = M.augroup,
-      callback = M.redraw_winbar,
-    })
+  vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter" }, {
+    group = M.augroup,
+    callback = M.redraw_winbar,
+  })
 
-    vim.api.nvim_create_user_command("Do", function(args)
-      M.add(unpack(args.fargs), args.bang)
-    end, { nargs = 1, bang = true })
+  vim.api.nvim_create_user_command("Do", function(args)
+    M.add(unpack(args.fargs), args.bang)
+  end, { nargs = 1, bang = true })
 
-    vim.api.nvim_create_user_command("DoToggle", M.toggle, {})
-    vim.api.nvim_create_user_command("Defer", M.defer, {})
-    vim.api.nvim_create_user_command("Drop", M.drop, {})
-    vim.api.nvim_create_user_command("Done", M.done, {})
-    vim.api.nvim_create_user_command("DoEdit", M.edit, {})
-  end,
-}
+  vim.api.nvim_create_user_command("DoToggle", M.toggle, {})
+  vim.api.nvim_create_user_command("Defer", M.defer, {})
+  vim.api.nvim_create_user_command("Drop", M.drop, {})
+  vim.api.nvim_create_user_command("Done", M.done, {})
+  vim.api.nvim_create_user_command("DoEdit", M.edit, {})
+end
+
+return M
