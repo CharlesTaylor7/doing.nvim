@@ -14,7 +14,7 @@ end
 
 --- Toggle todo winbar
 function M.toggle()
-  M.active = not M.active
+  M.enabled = not M.enabled
   M.redraw_winbar()
 end
 
@@ -45,6 +45,9 @@ end
 
 ---@return string|nil
 function M.current_task()
+  if not M.enabled then
+    return
+  end
   local lines = vim.api.nvim_buf_get_lines(M.tasks_bufnr, 0, 1, false)
   return lines[1]
 end
@@ -52,9 +55,11 @@ end
 ---@class (exact) Opts
 ---@field tasks_file string
 ---@field ignored_filetypes string[]
----@field active boolean
+---@field winbar boolean
+---@field enabled boolean
 M.default_opts = {
-  active = true,
+  enabled = true,
+  winbar = true,
   tasks_file = ".tasks",
   ignored_filetypes = {
     "prompt",
@@ -87,7 +92,8 @@ end
 --- Redraw winbar based on the first line of the tasks buffer
 function M.redraw_winbar()
   if
-    not M.active
+    not M.enabled
+    or not M.winbar
     or vim.fn.win_gettype() ~= ""
     or vim.tbl_contains(M.options.ignored_filetypes, vim.bo.filetype, {})
   then
@@ -136,7 +142,7 @@ function M.setup(opts)
   local opts = vim.tbl_deep_extend("force", M.default_opts, opts or {})
 
   M.options = opts
-  M.active = opts.active
+  M.winbar = opts.winbar
   M.setup_dir()
 
   vim.api.nvim_create_autocmd("DirChanged", {
