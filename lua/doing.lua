@@ -27,8 +27,12 @@ end
 --- Defer current task to end of list
 function M.defer()
   local task = M.current_task()
+  if task == "" then
+    return
+  end
   vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, 1, false, {})
   vim.api.nvim_buf_set_lines(M.tasks_bufnr, -1, -1, false, { task })
+
   M.redraw_winbar()
 end
 
@@ -43,13 +47,13 @@ function M.done()
   M.drop()
 end
 
----@return string|nil
+---@return string
 function M.current_task()
   if not M.enabled then
-    return
+    return ""
   end
   local lines = vim.api.nvim_buf_get_lines(M.tasks_bufnr, 0, 1, false)
-  return lines[1]
+  return lines[1] or ""
 end
 
 ---@class (exact) Opts
