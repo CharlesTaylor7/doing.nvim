@@ -9,19 +9,11 @@ function M.add(task, to_front)
     vim.api.nvim_buf_set_lines(M.tasks_bufnr, -1, -1, false, { task })
   end
   M.strip_blank_tasks()
-  M.redraw_winbar()
-end
-
---- Toggle todo winbar
-function M.toggle()
-  M.enabled = not M.enabled
-  M.redraw_winbar()
 end
 
 --- Drop current task with no event
 function M.drop()
   vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, 1, false, {})
-  M.redraw_winbar()
 end
 
 --- Defer current task to end of list
@@ -32,8 +24,6 @@ function M.defer()
   end
   vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, 1, false, {})
   vim.api.nvim_buf_set_lines(M.tasks_bufnr, -1, -1, false, { task })
-
-  M.redraw_winbar()
 end
 
 --- Edit the tasks in a floating window
@@ -49,9 +39,6 @@ end
 
 ---@return string
 function M.current_task()
-  if not M.enabled then
-    return ""
-  end
   local lines = vim.api.nvim_buf_get_lines(M.tasks_bufnr, 0, 1, false)
   return lines[1] or ""
 end
@@ -59,11 +46,7 @@ end
 ---@class (exact) Opts
 ---@field tasks_file string
 ---@field ignored_filetypes string[]
----@field winbar boolean
----@field enabled boolean
 M.default_opts = {
-  enabled = true,
-  winbar = true,
   tasks_file = ".tasks",
   ignored_filetypes = {
     "prompt",
@@ -79,34 +62,6 @@ function M.setup_dir()
   vim.fn.bufload(M.options.tasks_file)
   M.strip_blank_tasks()
   vim.api.nvim_set_option_value("modified", false, { buf = M.tasks_bufnr })
-  M.redraw_winbar()
-  --[[
-  vim.api.nvim_create_autocmd("BufDelete", {
-    group = M.augroup,
-    buffer = M.tasks_bufnr,
-    callback = M.clear_winbar,
-  })
-  --]]
-end
-
-function M.clear_winbar()
-  vim.api.nvim_set_option_value("winbar", "", { win = 0 })
-end
-
---- Redraw winbar based on the first line of the tasks buffer
-function M.redraw_winbar()
-  if
-    not M.enabled
-    or not M.winbar
-    or vim.fn.win_gettype() ~= ""
-    or vim.tbl_contains(M.options.ignored_filetypes, vim.bo.filetype, {})
-  then
-    vim.api.nvim_set_option_value("winbar", "", { win = 0 })
-    return
-  end
-
-  local task = M.current_task() or ""
-  vim.api.nvim_set_option_value("winbar", task, { win = 0 })
 end
 
 function M.open_float()
@@ -126,10 +81,7 @@ function M.open_float()
   vim.api.nvim_create_autocmd("WinClosed", {
     pattern = tostring(win),
     group = M.augroup,
-    callback = function()
-      M.strip_blank_tasks()
-      M.redraw_winbar()
-    end,
+    callback = M.strip_blank_tasks,
   })
 end
 
@@ -146,26 +98,17 @@ function M.setup(opts)
   local opts = vim.tbl_deep_extend("force", M.default_opts, opts or {})
 
   M.options = opts
-  M.winbar = opts.winbar
   M.setup_dir()
 
   vim.api.nvim_create_autocmd("DirChanged", {
     group = M.augroup,
-    callback = function()
-      M.setup_dir()
-    end,
-  })
-
-  vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter" }, {
-    group = M.augroup,
-    callback = M.redraw_winbar,
+    callback = M.setup_dir,
   })
 
   vim.api.nvim_create_user_command("Do", function(args)
     M.add(unpack(args.fargs), args.bang)
   end, { nargs = 1, bang = true })
 
-  vim.api.nvim_create_user_command("DoToggle", M.toggle, {})
   vim.api.nvim_create_user_command("Defer", M.defer, {})
   vim.api.nvim_create_user_command("Drop", M.drop, {})
   vim.api.nvim_create_user_command("Done", M.done, {})
