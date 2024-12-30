@@ -62,6 +62,7 @@ function M.setup_dir()
   vim.fn.bufload(M.options.tasks_file)
   M.strip_blank_tasks()
   vim.api.nvim_set_option_value("modified", false, { buf = M.tasks_bufnr })
+  vim.api.nvim_set_option_value("buflisted", false, { buf = M.tasks_bufnr })
 end
 
 function M.open_float()
