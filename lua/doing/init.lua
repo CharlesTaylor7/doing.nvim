@@ -2,13 +2,15 @@
 local M = {}
 
 --- Add a task to the list
-function M.add(task, to_front)
-  if to_front then
-    vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, 0, false, { task })
-  else
-    vim.api.nvim_buf_set_lines(M.tasks_bufnr, -1, -1, false, { task })
-  end
+function M.add(task)
+  vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, 0, false, { task })
   M.strip_blank_tasks()
+end
+
+--- Finish the current task
+function M.done()
+  vim.api.nvim_exec_autocmds("User", { pattern = "doing:Done", data = M.current_task() })
+  M.drop()
 end
 
 --- Drop current task with no event
@@ -16,25 +18,9 @@ function M.drop()
   vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, 1, false, {})
 end
 
---- Defer current task to end of list
-function M.defer()
-  local task = M.current_task()
-  if task == "" then
-    return
-  end
-  vim.api.nvim_buf_set_lines(M.tasks_bufnr, 0, 1, false, {})
-  vim.api.nvim_buf_set_lines(M.tasks_bufnr, -1, -1, false, { task })
-end
-
 --- Edit the tasks in a floating window
 function M.edit()
   M.open_float()
-end
-
---- Finish the current task
-function M.done()
-  vim.api.nvim_exec_autocmds("User", { pattern = "doing:Done", data = M.current_task() })
-  M.drop()
 end
 
 ---@return string
@@ -107,10 +93,9 @@ function M.setup(opts)
   })
 
   vim.api.nvim_create_user_command("Do", function(args)
-    M.add(unpack(args.fargs), args.bang)
-  end, { nargs = 1, bang = true })
+    M.add(table.unpack(args.fargs))
+  end, { nargs = 1 })
 
-  vim.api.nvim_create_user_command("Defer", M.defer, {})
   vim.api.nvim_create_user_command("Drop", M.drop, {})
   vim.api.nvim_create_user_command("Done", M.done, {})
   vim.api.nvim_create_user_command("DoEdit", M.edit, {})
