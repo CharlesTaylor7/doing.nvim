@@ -93,7 +93,7 @@ function M.setup(opts)
   })
 
   vim.api.nvim_create_user_command("Do", function(args)
-    M.add(table.unpack(args.fargs))
+    M.add(args.args)
   end, { nargs = 1 })
 
   vim.api.nvim_create_user_command("Drop", M.drop, {})
